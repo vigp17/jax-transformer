@@ -1,5 +1,5 @@
 import jax.numpy as jnp
-from model.attention import scaled_dot_product_attention
+from model.attention import multi_head_attention
 from model.layers import feed_forward
 
 def layer_norm(x, eps=1e-5):
@@ -10,13 +10,13 @@ def layer_norm(x, eps=1e-5):
     variance = jnp.mean(jnp.square(x - mean), axis=-1, keepdims=True)
     return (x - mean) / jnp.sqrt(variance + eps)
 
-def transformer_block(params, x):
+def transformer_block(params, x, num_heads=4):
     """
     The complete Lego brick: Attention -> Add & Norm -> Reasoning -> Add & Norm
     """
     # 1. Self-Attention (The Brain)
     # We pass 'x' in as Queries, Keys, and Values because the words are looking at themselves
-    attention_out, _ = scaled_dot_product_attention(x, x, x)
+    attention_out, _ = multi_head_attention(x, x, x, num_heads)
     
     # 2. First Skip Connection & Normalization
     x_norm1 = layer_norm(x + attention_out)

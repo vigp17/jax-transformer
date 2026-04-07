@@ -1,24 +1,31 @@
 import jax.numpy as jnp
 from jax import nn
 
-def scaled_dot_product_attention(queries, keys, values, mask=None):
+def multi_head_attention(queries, keys, values, num_heads):
     """
-    Calculates how much focus each word should give to other words.
+    Splits the work across multiple 'heads' so the AI can 
+    look at multiple relationships simultaneously.
     """
-    # 1. Find the dimension size of our keys (to stabilize the math)
-    d_k = queries.shape[-1]
+    batch_size, seq_len, d_model = queries.shape
+    assert d_model % num_heads == 0, "d_model must be divisible by num_heads"
     
-    # 2. Multiply Queries by the Transpose of Keys to get raw attention scores
-    scores = jnp.matmul(queries, keys.swapaxes(-1, -2)) / jnp.sqrt(d_k)
+    d_k = d_model // num_heads
     
-    # Optional: Hide future words if we are generating text
-    if mask is not None:
-        scores = jnp.where(mask == 0, -1e9, scores)
-        
-    # 3. Convert scores into percentages (probabilities) using Softmax
-    attention_weights = nn.softmax(scores, axis=-1)
+    # 1. Split into heads: (batch, seq, heads, d_k)
+    def split_heads(x):
+        x = x.reshape((batch_size, seq_len, num_heads, d_k))
+        return x.transpose((0, 2, 1, 3)) # (batch, heads, seq, d_k)
+
+    qs, ks, vs = map(split_heads, (queries, keys, values))
     
-    # 4. Multiply the weights by the Values to get the final context
-    output = jnp.matmul(attention_weights, values)
+    # 2. Scaled Dot-Product Attention for all heads at once
+    scores = jnp.matmul(qs, ks.transpose((0, 1, 3, 2))) / jnp.sqrt(d_k)
+    weights = nn.softmax(scores, axis=-1)
     
-    return output, attention_weights
+    # 3. Combine context from all heads
+    context = jnp.matmul(weights, vs) # (batch, heads, seq, d_k)
+    
+    # 4. Concatenate heads back together: (batch, seq, d_model)
+    context = context.transpose((0, 2, 1, 3)).reshape((batch_size, seq_len, d_model))
+    
+    return context, weights
