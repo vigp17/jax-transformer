@@ -1,0 +1,9 @@
+The transformer reads a stream of text and learns to guess what character comes next.
+This tiny dataset is intentionally small so it can train quickly on a laptop CPU.
+Real language models use the same next-token idea, but they train on much larger text collections,
+with bigger vocabularies, deeper networks, and many more optimization steps.
+
+The cat sat on the mat.
+The model watched the words repeat.
+The attention heads learned small patterns in the sequence.
+The generated text will be simple, but it now comes from real text instead of fake token IDs.
