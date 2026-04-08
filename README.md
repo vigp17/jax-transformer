@@ -8,8 +8,7 @@ This repository contains a ground-up implementation of a small character-level T
 * **Vectorized Multi-Head Attention:** Implemented 4-head causal attention using JAX's functional paradigm for maximum parallelization.
 * **Real Text Training:** Builds a character vocabulary from `data/input.txt` and trains with next-character prediction.
 * **XLA Optimized:** Leveraged Just-In-Time (JIT) compilation to fuse kernels, reducing overhead during high-dimensional matrix multiplications.
-* **Hardware Agnostic:** Seamlessly switches between `Metal` (macOS) and `CUDA` (Linux/Colab) backends.
-* **Interpretability Suite:** Built-in visualization tools to extract and map internal attention weights.
+* **Hardware Agnostic:** Runs on available JAX backends such as CPU, Metal, or CUDA.
 
 ## 🏗 Architecture
 The model follows the original *Attention is All You Need* blueprint with modern optimizations:
@@ -30,13 +29,6 @@ python train.py
 python generate.py
 ```
 
-### Attention Heatmap Analysis
-By visualizing the attention heads, we can observe the model's internal reasoning:
-* **Local Focus:** Some heads concentrate on the diagonal, learning immediate syntactic relationships.
-* **Global Context:** Other heads bridge longer-range dependencies, identifying repeated tokens across the sequence.
-
-![Attention Heatmap](notebooks/attention_heatmap.png)
-
 ## 🛠 How to Run
 ### Local Setup (macOS/Linux)
 1. Clone the repo: `git clone https://github.com/vigp17/jax-transformer.git`
@@ -45,6 +37,3 @@ By visualizing the attention heads, we can observe the model's internal reasonin
 4. Run training: `python train.py`
 5. Generate text: `python generate.py`
 6. Run tests: `python -m pytest -q`
-
-### Cloud Scaling
-Open `notebooks/JAX_Transformer_Training_A100.ipynb` in Google Colab to run on T4/A100 GPUs.
