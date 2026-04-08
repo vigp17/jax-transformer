@@ -16,13 +16,13 @@ def transformer_block(params, x, num_heads=4):
     """
     # 1. Self-Attention (The Brain)
     # We pass 'x' in as Queries, Keys, and Values because the words are looking at themselves
-    attention_out, _ = multi_head_attention(x, x, x, num_heads)
+    attention_out, _ = multi_head_attention(params["attention"], x, num_heads)
     
     # 2. First Skip Connection & Normalization
     x_norm1 = layer_norm(x + attention_out)
     
     # 3. Feed-Forward Network (The Reasoning)
-    ffn_out = feed_forward(params, x_norm1)
+    ffn_out = feed_forward(params["ffn"], x_norm1)
     
     # 4. Second Skip Connection & Normalization
     output = layer_norm(x_norm1 + ffn_out)
